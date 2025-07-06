@@ -18,4 +18,14 @@ public class DataPoint {
         this.value = value;
         this.tags = tags != null ? new HashMap<>(tags) : new HashMap<>();
     }
+
+    @Override
+    public String toString() {
+        return "DataPoint{" +
+                "timestamp=" + timestamp +
+                ", metric='" + metric + '\'' +
+                ", value=" + value +
+                ", tags=" + tags +
+                '}';
+    }
 }
