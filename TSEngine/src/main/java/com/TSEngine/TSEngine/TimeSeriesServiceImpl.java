@@ -1,7 +1,6 @@
 package com.TSEngine.TSEngine;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -30,6 +29,24 @@ public class TimeSeriesServiceImpl implements TimeSeriesService {
                 });
 
         return false;
+    }
+
+    @Override
+    public List<DataPoint> query(String metric, long timeStart, long timeEnd, Map<String, String> filters) {
+        ConcurrentSkipListMap<Long, List<DataPoint>> series = metricMap.get(metric);
+        if(series == null) return Collections.emptyList();
+
+        NavigableMap<Long, List<DataPoint>> range = series.subMap(timeStart,true, timeEnd, false);
+        List<DataPoint> results = new ArrayList<>();
+        for(List<DataPoint> dataPoints: range.values()){
+            for(DataPoint dp : dataPoints){
+                if(filters == null || filters.isEmpty() || dp.getTags().entrySet().containsAll(filters.entrySet())){
+                    results.add(dp);
+                }
+            }
+        }
+
+        return results;
     }
 
     public void printAllData(){

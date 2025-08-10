@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @SpringBootApplication
@@ -11,7 +12,7 @@ public class TsEngineApplication {
 
 	public static void main(String[] args) {
 
-		SpringApplication.run(TsEngineApplication.class, args);
+//		SpringApplication.run(TsEngineApplication.class, args);
 		TimeSeriesServiceImpl timeSeriesServiceImpl = new TimeSeriesServiceImpl();
 
 		long now = System.currentTimeMillis();
@@ -29,6 +30,14 @@ public class TsEngineApplication {
 		timeSeriesServiceImpl.insert(now + 1000, "memory.used", 512.0, tags1);
 
 		timeSeriesServiceImpl.printAllData();
+
+		List<DataPoint> results = timeSeriesServiceImpl.query("cpu.usage", now, now+5000,
+				Map.of("host", "server1"));
+
+
+		for (DataPoint dp : results) {
+			System.out.println(dp);
+		}
 	}
 
 }
