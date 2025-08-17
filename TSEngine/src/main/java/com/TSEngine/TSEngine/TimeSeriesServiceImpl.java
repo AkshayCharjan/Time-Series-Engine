@@ -38,11 +38,29 @@ public class TimeSeriesServiceImpl implements TimeSeriesService {
 
         NavigableMap<Long, List<DataPoint>> range = series.subMap(timeStart,true, timeEnd, false);
         List<DataPoint> results = new ArrayList<>();
+
+        if(filters == null || filters.isEmpty()){
+            for(List<DataPoint> dataPoints: range.values()){
+                results.addAll(dataPoints);
+            }
+        }
+
+        String[] filterKeys = filters.keySet().toArray(new String[0]);
+        String[] filterValues = filters.values().toArray(new String[0]);
+
+        outer:
         for(List<DataPoint> dataPoints: range.values()){
             for(DataPoint dp : dataPoints){
-                if(filters == null || filters.isEmpty() || dp.getTags().entrySet().containsAll(filters.entrySet())){
-                    results.add(dp);
+                Map<String, String> tags = dp.getTags();
+                if(tags == null) continue;
+
+                for(int i = 0; i < filterKeys.length; i++){
+                    String TagValue = tags.get(filterKeys[i]);
+                    if(TagValue == null || !TagValue.equals(filterValues[i])){
+                        continue outer;
+                    }
                 }
+                results.add(dp);
             }
         }
 
