@@ -33,7 +33,7 @@ public class TsEngineApplication {
 
 		List<DataPoint> results = timeSeriesServiceImpl.query("cpu.usage", now, now+5000,
 				Map.of("host", "server1"));
-		
+
 		for (DataPoint dp : results) {
 			System.out.println(dp);
 		}
