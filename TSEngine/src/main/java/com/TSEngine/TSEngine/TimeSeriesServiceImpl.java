@@ -8,6 +8,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class TimeSeriesServiceImpl implements TimeSeriesService {
 
     private final Map<String, ConcurrentSkipListMap<Long, List<DataPoint>>> metricMap = new ConcurrentHashMap<>();
+    private final WalWriter walWriter;
+
+    public TimeSeriesServiceImpl(){
+        this.walWriter = null;
+    }
+
+    public TimeSeriesServiceImpl(WalWriter walWriter){
+        this.walWriter = walWriter;
+    }
 
     @Override
     public boolean insert(long timestamp, String metric, double value, Map<String, String> tags){
