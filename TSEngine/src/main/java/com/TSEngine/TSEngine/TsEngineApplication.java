@@ -27,11 +27,11 @@ public class TsEngineApplication {
         long now = System.currentTimeMillis();
 
         Map<String, String> tags1 = new HashMap<>();
-        tags1.put("host", "server1");
+        tags1.put("host", "server3");
         tags1.put("dc", "us-west");
 
         Map<String, String> tags2 = new HashMap<>();
-        tags2.put("host", "server2");
+        tags2.put("host", "server4");
         tags2.put("dc", "us-east");
 
         service.insert(now, "cpu.usage", 67.5, tags1);
