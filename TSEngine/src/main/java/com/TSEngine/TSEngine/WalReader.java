@@ -9,10 +9,11 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.function.Consumer;
 
 public final class WalReader {
-    private static final OpenOption READ = null;
+    private static final OpenOption READ = StandardOpenOption.READ;
     private final Path walDir;
 
     public WalReader(Path walDir) {
