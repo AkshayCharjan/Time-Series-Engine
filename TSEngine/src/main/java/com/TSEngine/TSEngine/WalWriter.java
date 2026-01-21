@@ -3,6 +3,7 @@ package com.TSEngine.TSEngine;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,6 +37,32 @@ public class WalWriter{
         currentPath = finalPath;
     }
 
+    private void rotate() throws IOException {
+        ch.force(true);
+        ch.close();
+        segmentIndex++;
+        openNewSegment();
+    }
 
+    private void writeInt(int v) throws IOException {
+        ByteBuffer buf = ByteBuffer.allocate(4);
+        buf.putInt(v).flip();
+        while (buf.hasRemaining()) {
+            ch.write(buf);
+        }
+    }
 
+    private void writeBytes(byte[] bytes) throws IOException {
+        ByteBuffer buf = ByteBuffer.wrap(bytes);
+        while (buf.hasRemaining()) {
+            ch.write(buf);
+        }
+    }
+
+    public void close() throws IOException {
+        if (ch != null) {
+            ch.force(true);
+            ch.close();
+        }
+    }
 }
