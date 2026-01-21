@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.util.OptionalInt;
 
 import static java.nio.file.StandardOpenOption.*;
 
@@ -22,19 +22,41 @@ public class WalWriter{
     public WalWriter(WalConfig walConfig) throws IOException {
         this.walConfig = walConfig;
         Files.createDirectories(walConfig.walDir);
+        initFromDisk();
+    }
+
+    private void initFromDisk() throws IOException {
+        if (!Files.exists(walConfig.walDir)) {
+            openNewSegment();
+            return;
+        }
+
+        try (var s = Files.list(walConfig.walDir)) {
+            OptionalInt max = s
+                .map(p -> p.getFileName().toString())
+                .filter(n -> n.startsWith("wal-") && n.endsWith(".log"))
+                .mapToInt(n -> Integer.parseInt(n.substring(4, 10)))
+                .max();
+
+            if (max.isPresent()) {
+                segmentIndex = max.getAsInt();
+                currentPath = walConfig.walDir.resolve(
+                    String.format("wal-%06d.log", segmentIndex)
+                );
+                ch = FileChannel.open(currentPath, CREATE, WRITE, APPEND);
+                currentSize = ch.size();
+                return;
+            }
+        }
+
         openNewSegment();
     }
 
     public void openNewSegment() throws IOException {
-        String tmp = String.format("wal-%06d.log.tmp", segmentIndex);
-        String fin = String.format("wal-%06d.log",segmentIndex);
-        currentPath = walConfig.walDir.resolve(tmp);
+        String fin = String.format("wal-%06d.log", segmentIndex);
+        currentPath = walConfig.walDir.resolve(fin);
         ch = FileChannel.open(currentPath, CREATE, WRITE, APPEND);
         currentSize = ch.size();
-
-        Path finalPath = walConfig.walDir.resolve(fin);
-        Files.move(currentPath, finalPath, StandardCopyOption.ATOMIC_MOVE);
-        currentPath = finalPath;
     }
     
     public synchronized void append(WalRecord rec) throws IOException {
