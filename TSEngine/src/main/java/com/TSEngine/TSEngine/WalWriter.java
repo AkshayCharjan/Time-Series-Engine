@@ -36,6 +36,24 @@ public class WalWriter{
         Files.move(currentPath, finalPath, StandardCopyOption.ATOMIC_MOVE);
         currentPath = finalPath;
     }
+    
+    public synchronized void append(WalRecord rec) throws IOException {
+        byte[] payload = WalCodec.serialize(rec);
+
+        int crc = WalCodec.crc32(payload);
+        int len = payload.length;
+
+        writeInt(len);
+        writeInt(crc);
+        writeBytes(payload);
+
+        currentSize += 8L + len;
+
+        if (currentSize >= walConfig.maxSegmentBytes) {
+            rotate();
+        }
+    }
+
 
     private void rotate() throws IOException {
         ch.force(true);
